@@ -114,51 +114,63 @@ def generate_features(data, test_size=0.2, feature_type='bow', ngram_min=1, ngra
 def optimizeSVMModel(xtrain, xtest, ytrain, ytest, c, penalty):
     # Define model parameters and train model
     svm_classifier = LinearSVC(penalty='l2', C=10, tol=1e-5, max_iter=5000)
-    svm_classifier.fit(xtrain, ytrain)
+    grid = GridSearchCV(svm_classifier, parameters, n_jobs=-1)
+    grid.fit(xtrain, ytrain)
 
-    # Score Model
-    svm_score = svm_classifier.score(xtest, ytest)
-    test_pred = svm_classifier.predict(xtest)
+    best_model = grid.best_estimator_
+    best_test_acc = best_model.score(xtest, ytest)
+
+    # Score Model and Generate confusion matrix
+    test_pred = best_model.predict(xtest)
     test_prec = precision_score(ytest, test_pred)
     test_recall = recall_score(ytest, test_pred)
     test_f1 = f1_score(ytest, test_pred)
-
-    print("Evaluation Metrics")
-    print('-' * 18)
-    print(f"Precision: {test_prec}")
-    print(f"Recall: {test_recall}")
-    print(f"F1: {test_f1}")
-    print()
 
     # Generate confusion matrix
     conf_matrix = confusion_matrix(ytest, test_pred, normalize='true')
     ConfusionMatrixDisplay(conf_matrix, display_labels=[0, 1]).plot()
 
 
-def optimizeRFModel(xtrain, xtest, ytrain, ytest, c, penalty):
-    rf_classifier = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+def optimizeRFModel(xtrain, xtest, ytrain, ytest):
+    n_estimators = [int(x) for x in np.arange(start=50, stop=3000, step=10)]
+    # Number of features to consider at every split
+    max_features = ['auto', 'sqrt']
+    # Maximum number of levels in tree
+    max_depth = [int(x) for x in np.arange(5, 70, step=10)]
+    max_depth.append(None)
+    # Minimum number of samples required to split a node
+    min_samples_split = [5, 6, 7, 8, 9, 10]
+    # Minimum number of samples required at each leaf node
+    min_samples_leaf = [2, 4, 8, 9, 10, 11, 12]
+    # Create the random grid
+    random_grid = {'n_estimators': n_estimators,
+                   'max_features': max_features,
+                   'max_depth': max_depth,
+                   'min_samples_split': min_samples_split,
+                   'min_samples_leaf': min_samples_leaf}
 
-    rf_classifier.fit(xtrain, ytrain)
+    # Use the random grid to search for best hyperparameters
+    # First create the base model to tune
+    # Random search of parameters, using 3 fold cross validation,
+    # search across 100 different combinations, and use all available cores
+
+    grid = GridSearchCV(RandomForestClassifier(), param_distributions=random_grid,
+                        n_iter=25,
+                        cv=5, random_state=42, n_jobs=-1)
+    grid.fit(xtrain, ytrain)
+
+    best_model = grid.best_estimator_
+    best_test_acc = best_model.score(xtest, ytest)
 
     # Score Model and Generate confusion matrix
-    svm_score = rf_classifier.score(xtest, ytest)
-    test_pred = rf_classifier.predict(xtest)
+    test_pred = best_model.predict(xtest)
     test_prec = precision_score(ytest, test_pred)
     test_recall = recall_score(ytest, test_pred)
     test_f1 = f1_score(ytest, test_pred)
-    print("Evaluation Metrics")
-    print('-' * 18)
-    print(f"Precision: {test_prec}")
-    print(f"Recall: {test_recall}")
-    print(f"F1: {test_f1}")
-    print()
-
-    # Generate confusion matrix
-    conf_matrix = confusion_matrix(y_test, test_pred, normalize='true')
-    ConfusionMatrixDisplay(conf_matrix, display_labels=[0, 1]).plot()
+    
 
 
-def svmModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
+def svmModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty, feature_type = 'bow'):
     # feature_type = 'bow'
     # ngram_min = 1
     # ngram_max = 1
@@ -182,7 +194,7 @@ def svmModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
     best_svm_acc = optimizeSVMModel(x_train, x_test, y_train, y_test, c=c, penalty=penalty)
 
 
-def rfModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
+def rfModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty, feature_type = 'bow'):
     # feature_type = 'bow'
     # ngram_min = 1
     # ngram_max = 1
@@ -206,9 +218,7 @@ def rfModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
 
 
 
-best_acc = modelTester(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), float(c), str(penalty))
-
-print("Params:" + filename + ":BestAcc:" + str(best_acc))
+# print("Params:" + filename + ":BestAcc:" + str(best_acc))
 # job scheduler
 
 
