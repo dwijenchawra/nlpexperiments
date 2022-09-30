@@ -42,14 +42,31 @@ for i in tqdm(data.text):
     text_data.append(preprocess_text(i))
 data['text'] = text_data
 
-from ast import arg
-import asyncio
-import threading
 import numpy as np
 from threading import Thread
 
 
-def modelTester(ngram_min, ngram_max, min_df, max_df):
+def optimizeModel(xtrain, xtest, labels, parameters):
+    log_model = LogisticRegression(max_iter=2000, solver='liblinear')
+    grid = GridSearchCV(log_model, parameters, n_jobs=-1)
+    grid.fit(xtrain, labels)
+
+    best_model = grid.best_estimator_
+    print("Best_Parameters:")
+    for k, v in grid.best_params_.items():
+        print(f"{k} = {v}")
+    print()
+    print("#" * 20)
+    print()
+
+    best_test_acc = best_model.score(xtest, labels)
+    print(f"New Test Accuracy: {best_test_acc}")
+
+
+
+
+
+def modelTester(ngram_min, ngram_max, min_df, max_df, ):
     train_df, test_df = train_test_split(data, test_size=0.2)
     vectorizer = CountVectorizer(ngram_range=(
         ngram_min, ngram_max), min_df=min_df, max_df=max_df)
@@ -66,47 +83,15 @@ def modelTester(ngram_min, ngram_max, min_df, max_df):
 
     num_processors = -1
 
-    model = LogisticRegression(
-        max_iter=2000, n_jobs=num_processors, solver='liblinear')
-    model.fit(x_train.toarray(), train_df.label.values)
+    hyplist = {'penalty': ['l1', 'l2'], 'C': [0.01, 0.1, 1, 10, 100]}
 
-    test_acc = model.score(x_test, test_df.label.values)
-    print(f"Test Set Accuracy: {test_acc}")
-
-    return test_acc
+    optimizeModel(x_train, x_test, test_df.label.values, hyplist)
 
 
-# threads = []
-# for minfreq in np.arange(0, 0.1, 0.001):
-#     ngram_min = 1
-#     ngram_max = 4
-#     min_df = minfreq
-#     max_df = 1.0
-
-#     t = ThreadWithReturnValue(target=modelTester, args=(
-#         ngram_min, ngram_max, min_df, max_df))
-#     t.start()
-
-#     threads.append(t)
-
-# results = []
-# for i in threads: 
-#     results.append(i.join())
+# job scheduler
 
 
-print(modelTester(1, 4, 0.01, 1.0))
 
-# currmax = 0.0
-# curri = 0.0
-# for i in np.arange(0.01, 0.001, -0.001):
-#     print(i)
-#     acc = modelTester(1, 4, i, 1.0)
-#     if acc > currmax:
-#         print("newmax")
-#         print(acc)
-#         print(i)
-#         currmax = acc
-#         curri = i
 
-# print(currmax)
-# print(curri)
+
+
