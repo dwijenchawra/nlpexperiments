@@ -1,3 +1,4 @@
+from asyncio import subprocess
 import os
 import numpy as np
 import time
@@ -72,7 +73,7 @@ for ngmin in np.arange(1, 5, 1):
                             fh.writelines(
                                 "python ./modeloptimization.py %g %g %g %g %g %s %s" % (ngmin, ngmax, mindf, maxdf, c, penalty, filename))
 
-                        os.system("sbatch %s" % job_file)
+                        subprocess.call("sbatch %s" % job_file)
                         time.sleep(0.1)
                         
                         count += 1
