@@ -15,6 +15,7 @@ data_dir = os.path.join(scratch, '/nlp_testing/')
 mkdir_p(job_directory)
 mkdir_p(data_dir)
 
+count = 0
 for ngmin in np.arange(1, 5, 1):
     for ngmax in np.arange(ngmin, 5, 1):
         for mindf in np.arange(ngmin, 5, 1):
@@ -24,11 +25,13 @@ for ngmin in np.arange(1, 5, 1):
                         if count == 3:
                             quit()
 
-                        jobname = ""
+                        jobname = "logreg_testing"
+                        filename = "_".join(
+                            [ngmin, ngmax, mindf, maxdf, c, penalty])
 
                         job_file = os.path.join(
-                            job_directory, "%s.job" % lizard)
-                        lizard_data = os.path.join(data_dir, lizard)
+                            job_directory, "%s_dir" % filename)
+                        lizard_data = os.path.join(data_dir, filename)
 
                         # Create lizard directories
                         mkdir_p(lizard_data)
@@ -36,15 +39,17 @@ for ngmin in np.arange(1, 5, 1):
                         with open(job_file) as fh:
                             fh.writelines("#!/bin/bash\n")
                             fh.writelines(
-                                "#SBATCH --job-name=%s.job\n" % lizard)
+                                "#SBATCH --job-name=%s.job\n" % filename)
                             fh.writelines(
-                                "#SBATCH --output=.out/%s.out\n" % lizard)
+                                "#SBATCH --output=.out/%s.out\n" % filename)
                             fh.writelines(
-                                "#SBATCH --error=.out/%s.err\n" % lizard)
+                                "#SBATCH --error=.out/%s.err\n" % filename)
                             fh.writelines("#SBATCH --time=00:30:00\n")
                             fh.writelines("#SBATCH --mem=8000\n")
-                            fh.writelines("#SBATCH --qos=normal\n")
+                            fh.writelines("#SBATCH --account=cis220051\n")
                             fh.writelines(
-                                "Rscript $HOME/project/LizardLips/run.R %s potato shiabato\n" % lizard_data)
+                                "python $HOME/project/LizardLips/run.R %s\n" % lizard_data)
 
                         os.system("sbatch %s" % job_file)
+                        
+                        count += 1

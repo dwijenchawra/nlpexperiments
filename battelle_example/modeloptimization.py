@@ -9,9 +9,15 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, wordpunct_tokenize
 import os
 import re
-
 import pandas as pd
 import nltk
+
+
+import sys
+
+ngram_min, ngram_max, min_df, max_df, c, penalty = sys.argv[1:]
+
+
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
@@ -38,7 +44,7 @@ def preprocess_text(text):
     return text
 
 text_data = []
-for i in tqdm(data.text):
+for i in data.text:
     text_data.append(preprocess_text(i))
 data['text'] = text_data
 
@@ -46,27 +52,18 @@ import numpy as np
 from threading import Thread
 
 
-def optimizeModel(xtrain, xtest, labels, parameters):
-    log_model = LogisticRegression(max_iter=2000, solver='liblinear')
-    grid = GridSearchCV(log_model, parameters, n_jobs=-1)
-    grid.fit(xtrain, labels)
+def optimizeModel(xtrain, xtest, train_labels, test_labels, c, penalty):
+    log_model = LogisticRegression(max_iter=2000, solver='liblinear', C=c, penalty=penalty)
+    log_model.fit(xtrain, train_labels)
 
-    best_model = grid.best_estimator_
-    print("Best_Parameters:")
-    for k, v in grid.best_params_.items():
-        print(f"{k} = {v}")
-    print()
-    print("#" * 20)
-    print()
-
-    best_test_acc = best_model.score(xtest, labels)
-    print(f"New Test Accuracy: {best_test_acc}")
+    best_test_acc = log_model.score(xtest, test_labels)
+    print(f"Test Accuracy: {best_test_acc}")
 
 
 
 
 
-def modelTester(ngram_min, ngram_max, min_df, max_df, ):
+def modelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
     train_df, test_df = train_test_split(data, test_size=0.2)
     vectorizer = CountVectorizer(ngram_range=(
         ngram_min, ngram_max), min_df=min_df, max_df=max_df)
@@ -81,11 +78,10 @@ def modelTester(ngram_min, ngram_max, min_df, max_df, ):
     least_common = term_counts[-10:]
     least_common.reverse()
 
-    num_processors = -1
+    optimizeModel(x_train, x_test, train_df.label.values, test_df.label.values, c=c, penalty=penalty)
 
-    hyplist = {'penalty': ['l1', 'l2'], 'C': [0.01, 0.1, 1, 10, 100]}
 
-    optimizeModel(x_train, x_test, test_df.label.values, hyplist)
+modelTester(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), float(c), str(penalty))
 
 
 # job scheduler
