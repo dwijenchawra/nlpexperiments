@@ -1,0 +1,1 @@
+for FILE in .job/out/*; do echo $FILE && cat $FILE; done | awk -
