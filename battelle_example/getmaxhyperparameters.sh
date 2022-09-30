@@ -11,4 +11,4 @@ for FILE in .job/out/*; do cat $FILE; done | awk -F ":" '
             printf(i":%f\n", acc[i])
             count++;
         }
-    }' | head -n 10 | column --table --table-columns "Hyperparameters","Test Accuracy" -s ":"
+    }' | head -n 20 | column --table --table-columns "Hyperparameters","Test Accuracy" -s ":"
