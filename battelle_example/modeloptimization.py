@@ -1,3 +1,4 @@
+import resource
 
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -86,8 +87,7 @@ modelTester(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df)
 
 # job scheduler
 
-
-
+print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000)
 
 
 

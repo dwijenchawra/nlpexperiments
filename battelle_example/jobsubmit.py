@@ -24,11 +24,11 @@ mkdir_p(err_directory)
 count = 0
 for ngmin in np.arange(1, 5, 1):
     for ngmax in np.arange(ngmin, 5, 1):
-        for mindf in np.arange(ngmin, 5, 1):
-            for maxdf in np.arange(ngmin, 5, 1):
+        for mindf in np.arange(0.006, 0.015, 0.002):
+            for maxdf in [1.0]:
                 for c in [0.01, 0.1, 1, 10, 100]:
                     for penalty in ['l1', 'l2']:
-                        if count == 1:
+                        if count == 5:
                             quit()
 
                         jobname = "logreg_testing"
@@ -53,15 +53,15 @@ for ngmin in np.arange(1, 5, 1):
                             # fh.writelines(
                                 # "#SBATCH --output=../out/%s.out\n" % filename)
                             fh.writelines(
-                                "#SBATCH --output=%s\n" %out_file)
+                                "#SBATCH --output=%s\n" % out_file)
                             fh.writelines(
                                 "#SBATCH --error=%s\n" % err_file)
                             fh.writelines("#SBATCH --time=00:30:00\n")
-                            fh.writelines("#SBATCH --mem=8000\n")
+                            fh.writelines("#SBATCH --mem=32000\n")
                             fh.writelines("#SBATCH --account=cis220051\n")
                             fh.writelines("#SBATCH --partition=shared\n")
                             fh.writelines(
-                                "python ./modeloptimization.py %g %g %d %d %g %s" % (ngmin, ngmax, mindf, maxdf, c, penalty))
+                                "python ./modeloptimization.py %g %g %g %g %g %s" % (ngmin, ngmax, mindf, maxdf, c, penalty))
 
                         os.system("sbatch %s" % job_file)
                         time.sleep(1)
