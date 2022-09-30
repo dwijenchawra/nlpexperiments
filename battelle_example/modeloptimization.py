@@ -1,5 +1,3 @@
-import resource
-
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
@@ -16,7 +14,7 @@ import nltk
 
 import sys
 
-ngram_min, ngram_max, min_df, max_df, c, penalty = sys.argv[1:]
+ngram_min, ngram_max, min_df, max_df, c, penalty, filename = sys.argv[1:]
 
 
 nltk.download('punkt')
@@ -58,7 +56,7 @@ def optimizeModel(xtrain, xtest, train_labels, test_labels, c, penalty):
     log_model.fit(xtrain, train_labels)
 
     best_test_acc = log_model.score(xtest, test_labels)
-    print(f"Test Accuracy: {best_test_acc}")
+    return best_test_acc
 
 
 
@@ -79,15 +77,15 @@ def modelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
     least_common = term_counts[-10:]
     least_common.reverse()
 
-    optimizeModel(x_train, x_test, train_df.label.values, test_df.label.values, c=c, penalty=penalty)
+    return optimizeModel(x_train, x_test, train_df.label.values, test_df.label.values, c=c, penalty=penalty)
 
 
-modelTester(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), float(c), str(penalty))
+best_acc = modelTester(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), float(c), str(penalty))
 
-
+print("Params:" + filename + ":BestAcc:" + str(best_acc))
 # job scheduler
 
-print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000)
+
 
 
 
