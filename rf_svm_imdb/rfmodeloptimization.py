@@ -194,7 +194,7 @@ def svmModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty, feature_typ
     best_svm_acc = optimizeSVMModel(x_train, x_test, y_train, y_test, c=c, penalty=penalty)
 
 
-def rfModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty, feature_type = 'bow'):
+def rfModelTester(ngram_min, ngram_max, min_df, max_df, feature_type = 'bow'):
     # feature_type = 'bow'
     # ngram_min = 1
     # ngram_max = 1
@@ -214,7 +214,7 @@ def rfModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty, feature_type
     least_common.reverse()
 
     best_rf_acc = optimizeRFModel(
-        x_train, x_test, y_train, y_test, c=c, penalty=penalty)
+        x_train, x_test, y_train, y_test)
 
 
 
