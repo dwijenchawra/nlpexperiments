@@ -16,6 +16,10 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 from tqdm import tqdm
 
+'''
+tell people about what the confusion matrix means
+what parts are important to us
+'''
 
 import sys
 
@@ -99,7 +103,7 @@ def generate_features(data, test_size=0.2, feature_type='bow', ngram_min=1, ngra
     y_train = train_df.label.values
     y_test = test_df.label.values
 
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train, x_test, y_test, vectorizer
 
 
 
@@ -107,17 +111,17 @@ def generate_features(data, test_size=0.2, feature_type='bow', ngram_min=1, ngra
 
 
 
-def optimizeModel(xtrain, xtest, train_labels, test_labels, c, penalty):
+def optimizeSVMModel(xtrain, xtest, ytrain, ytest, c, penalty):
     # Define model parameters and train model
     svm_classifier = LinearSVC(penalty='l2', C=10, tol=1e-5, max_iter=5000)
-    svm_classifier.fit(x_train, y_train)
+    svm_classifier.fit(xtrain, ytrain)
 
     # Score Model
-    svm_score = svm_classifier.score(x_test, y_test)
-    test_pred = svm_classifier.predict(x_test)
-    test_prec = precision_score(y_test, test_pred)
-    test_recall = recall_score(y_test, test_pred)
-    test_f1 = f1_score(y_test, test_pred)
+    svm_score = svm_classifier.score(xtest, ytest)
+    test_pred = svm_classifier.predict(xtest)
+    test_prec = precision_score(ytest, test_pred)
+    test_recall = recall_score(ytest, test_pred)
+    test_f1 = f1_score(ytest, test_pred)
 
     print("Evaluation Metrics")
     print('-' * 18)
@@ -127,19 +131,21 @@ def optimizeModel(xtrain, xtest, train_labels, test_labels, c, penalty):
     print()
 
     # Generate confusion matrix
-    conf_matrix = confusion_matrix(y_test, test_pred, normalize='true')
+    conf_matrix = confusion_matrix(ytest, test_pred, normalize='true')
     ConfusionMatrixDisplay(conf_matrix, display_labels=[0, 1]).plot()
 
+
+def optimizeRFModel(xtrain, xtest, ytrain, ytest, c, penalty):
     rf_classifier = RandomForestClassifier(n_estimators=100, n_jobs=-1)
 
-    rf_classifier.fit(x_train, y_train)
+    rf_classifier.fit(xtrain, ytrain)
 
     # Score Model and Generate confusion matrix
-    svm_score = rf_classifier.score(x_test, y_test)
-    test_pred = rf_classifier.predict(x_test)
-    test_prec = precision_score(y_test, test_pred)
-    test_recall = recall_score(y_test, test_pred)
-    test_f1 = f1_score(y_test, test_pred)
+    svm_score = rf_classifier.score(xtest, ytest)
+    test_pred = rf_classifier.predict(xtest)
+    test_prec = precision_score(ytest, test_pred)
+    test_recall = recall_score(ytest, test_pred)
+    test_f1 = f1_score(ytest, test_pred)
     print("Evaluation Metrics")
     print('-' * 18)
     print(f"Precision: {test_prec}")
@@ -152,17 +158,16 @@ def optimizeModel(xtrain, xtest, train_labels, test_labels, c, penalty):
     ConfusionMatrixDisplay(conf_matrix, display_labels=[0, 1]).plot()
 
 
-
-
-
-def modelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
+def svmModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
     # feature_type = 'bow'
     # ngram_min = 1
     # ngram_max = 1
     # min_df = 40
     # max_df = 1.0
 
-    x_train, y_train, x_test, y_test = generate_features(
+
+
+    x_train, y_train, x_test, y_test, vectorizer = generate_features(
         data, feature_type=feature_type, ngram_min=ngram_min, ngram_max=ngram_max, min_df=min_df, max_df=max_df
     )
 
@@ -174,7 +179,31 @@ def modelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
     least_common = term_counts[-10:]
     least_common.reverse()
 
-    return optimizeModel(x_train, x_test, train_df.label.values, test_df.label.values, c=c, penalty=penalty)
+    best_svm_acc = optimizeSVMModel(x_train, x_test, y_train, y_test, c=c, penalty=penalty)
+
+
+def rfModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
+    # feature_type = 'bow'
+    # ngram_min = 1
+    # ngram_max = 1
+    # min_df = 40
+    # max_df = 1.0
+
+    x_train, y_train, x_test, y_test, vectorizer = generate_features(
+        data, feature_type=feature_type, ngram_min=ngram_min, ngram_max=ngram_max, min_df=min_df, max_df=max_df
+    )
+
+    terms = vectorizer.get_feature_names()
+    term_counts = x_train.toarray().sum(axis=0).tolist()
+    term_counts = sorted(zip(terms, term_counts), key=lambda x: x[1])
+    term_counts.reverse()
+    num_terms = len(terms)
+    least_common = term_counts[-10:]
+    least_common.reverse()
+
+    best_rf_acc = optimizeRFModel(
+        x_train, x_test, y_train, y_test, c=c, penalty=penalty)
+
 
 
 best_acc = modelTester(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), float(c), str(penalty))
