@@ -9,10 +9,10 @@ def mkdir_p(dir):
         os.mkdir(dir)
 
 
-job_directory = "%s/.job" % os.getcwd()
-script_directory = "%s/.job/script" % os.getcwd()
-out_directory = "%s/.job/out" % os.getcwd()
-err_directory = "%s/.job/err" % os.getcwd()
+job_directory = "%s/.rfjob" % os.getcwd()
+script_directory = "%s/.rfjob/script" % os.getcwd()
+out_directory = "%s/.rfjob/out" % os.getcwd()
+err_directory = "%s/.rfjob/err" % os.getcwd()
 
 # Make top level directories
 mkdir_p(job_directory)
@@ -38,8 +38,8 @@ for ngmin in np.arange(1, 5, 1):
     for ngmax in np.arange(ngmin, 5, 1):
         for mindf in np.arange(0.003, 0.01, 0.001):
             for featuretype in ['bow', 'tfidf']:
-                # if count == 5:
-                #     quit()
+                if count == 1:
+                    quit()
 
                 jobname = "rf_testing"
                 params = [ngmin, ngmax, mindf, maxdf, featuretype]
@@ -67,13 +67,14 @@ for ngmin in np.arange(1, 5, 1):
                     fh.writelines(
                         "#SBATCH --error=%s\n" % err_file)
                     fh.writelines("#SBATCH --time=00:30:00\n")
-                    fh.writelines("#SBATCH --mem=32000\n")
+                    fh.writelines("#SBATCH --mem=250000\n")
+                    fh.writelines("#SBATCH --cores=128\n")
                     fh.writelines("#SBATCH --account=cis220051\n")
                     fh.writelines("#SBATCH --partition=shared\n")
                     fh.writelines(
-                        "python ./rfmodeloptimization.py %g %g %g %g %g %s" % (ngmin, ngmax, mindf, maxdf, featuretype, filename))
+                        "python ./rfmodeloptimization.py %g %g %g %g %s %s" % (ngmin, ngmax, mindf, maxdf, featuretype, filename))
 
-                subprocess.call("sbatch %s" % job_file)
+                # subprocess.call("sbatch %s" % job_file)
                 time.sleep(0.1)
                 
                 count += 1
