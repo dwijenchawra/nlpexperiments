@@ -23,7 +23,7 @@ what parts are important to us
 
 import sys
 
-ngram_min, ngram_max, min_df, max_df, c, penalty, filename = sys.argv[1:]
+ngram_min, ngram_max, min_df, max_df, featuretype, filename = sys.argv[1:]
 
 
 data_path = "/home/x-dchawra/nlpexperiments/rf_svm_imdb/IMDB Dataset.csv.zip"
@@ -113,8 +113,8 @@ def generate_features(data, test_size=0.2, feature_type='bow', ngram_min=1, ngra
 
 def optimizeSVMModel(xtrain, xtest, ytrain, ytest, c, penalty):
     # Define model parameters and train model
-    svm_classifier = LinearSVC(penalty='l2', C=10, tol=1e-5, max_iter=5000)
-    grid = GridSearchCV(svm_classifier, parameters, n_jobs=-1)
+    grid = GridSearchCV(LinearSVC(penalty='l2', C=10, tol=1e-5,
+                        max_iter=5000), parameters, n_jobs=-1)
     grid.fit(xtrain, ytrain)
 
     best_model = grid.best_estimator_
@@ -127,21 +127,23 @@ def optimizeSVMModel(xtrain, xtest, ytrain, ytest, c, penalty):
     test_f1 = f1_score(ytest, test_pred)
 
     # Generate confusion matrix
-    conf_matrix = confusion_matrix(ytest, test_pred, normalize='true')
-    ConfusionMatrixDisplay(conf_matrix, display_labels=[0, 1]).plot()
+    # conf_matrix = confusion_matrix(ytest, test_pred, normalize='true')
+    # ConfusionMatrixDisplay(conf_matrix, display_labels=[0, 1]).plot()
+
+    return best_test_acc, test_prec, test_recall, test_f1
 
 
 def optimizeRFModel(xtrain, xtest, ytrain, ytest):
-    n_estimators = [int(x) for x in np.arange(start=50, stop=3000, step=10)]
+    n_estimators = [int(x) for x in np.arange(start=50, stop=3000, step=100)]
     # Number of features to consider at every split
     max_features = ['auto', 'sqrt']
     # Maximum number of levels in tree
-    max_depth = [int(x) for x in np.arange(5, 70, step=10)]
+    max_depth = [int(x) for x in np.arange(1, 20, step=5)]
     max_depth.append(None)
     # Minimum number of samples required to split a node
-    min_samples_split = [5, 6, 7, 8, 9, 10]
+    min_samples_split = [2, 4, 8, 10]
     # Minimum number of samples required at each leaf node
-    min_samples_leaf = [2, 4, 8, 9, 10, 11, 12]
+    min_samples_leaf = [2, 4, 8, 16]
     # Create the random grid
     random_grid = {'n_estimators': n_estimators,
                    'max_features': max_features,
@@ -154,9 +156,7 @@ def optimizeRFModel(xtrain, xtest, ytrain, ytest):
     # Random search of parameters, using 3 fold cross validation,
     # search across 100 different combinations, and use all available cores
 
-    grid = GridSearchCV(RandomForestClassifier(), param_distributions=random_grid,
-                        n_iter=25,
-                        cv=5, random_state=42, n_jobs=-1)
+    grid = GridSearchCV(RandomForestClassifier(), param_grid=random_grid, n_jobs=-1)
     grid.fit(xtrain, ytrain)
 
     best_model = grid.best_estimator_
@@ -167,6 +167,8 @@ def optimizeRFModel(xtrain, xtest, ytrain, ytest):
     test_prec = precision_score(ytest, test_pred)
     test_recall = recall_score(ytest, test_pred)
     test_f1 = f1_score(ytest, test_pred)
+
+    return best_test_acc, test_prec, test_recall, test_f1
     
 
 
@@ -179,19 +181,19 @@ def svmModelTester(ngram_min, ngram_max, min_df, max_df, c, penalty, feature_typ
 
 
 
-    x_train, y_train, x_test, y_test, vectorizer = generate_features(
+    x_train, y_train, x_test, y_test = generate_features(
         data, feature_type=feature_type, ngram_min=ngram_min, ngram_max=ngram_max, min_df=min_df, max_df=max_df
     )
 
-    terms = vectorizer.get_feature_names()
-    term_counts = x_train.toarray().sum(axis=0).tolist()
-    term_counts = sorted(zip(terms, term_counts), key=lambda x: x[1])
-    term_counts.reverse()
-    num_terms = len(terms)
-    least_common = term_counts[-10:]
-    least_common.reverse()
+    # terms = vectorizer.get_feature_names()
+    # term_counts = x_train.toarray().sum(axis=0).tolist()
+    # term_counts = sorted(zip(terms, term_counts), key=lambda x: x[1])
+    # term_counts.reverse()
+    # num_terms = len(terms)
+    # least_common = term_counts[-10:]
+    # least_common.reverse()
 
-    best_svm_acc = optimizeSVMModel(x_train, x_test, y_train, y_test, c=c, penalty=penalty)
+    return optimizeSVMModel(x_train, x_test, y_train, y_test, c=c, penalty=penalty)
 
 
 def rfModelTester(ngram_min, ngram_max, min_df, max_df, feature_type = 'bow'):
@@ -201,26 +203,26 @@ def rfModelTester(ngram_min, ngram_max, min_df, max_df, feature_type = 'bow'):
     # min_df = 40
     # max_df = 1.0
 
-    x_train, y_train, x_test, y_test, vectorizer = generate_features(
+    x_train, y_train, x_test, y_test = generate_features(
         data, feature_type=feature_type, ngram_min=ngram_min, ngram_max=ngram_max, min_df=min_df, max_df=max_df
     )
 
-    terms = vectorizer.get_feature_names()
-    term_counts = x_train.toarray().sum(axis=0).tolist()
-    term_counts = sorted(zip(terms, term_counts), key=lambda x: x[1])
-    term_counts.reverse()
-    num_terms = len(terms)
-    least_common = term_counts[-10:]
-    least_common.reverse()
+    # terms = vectorizer.get_feature_names()
+    # term_counts = x_train.toarray().sum(axis=0).tolist()
+    # term_counts = sorted(zip(terms, term_counts), key=lambda x: x[1])
+    # term_counts.reverse()
+    # num_terms = len(terms)
+    # least_common = term_counts[-10:]
+    # least_common.reverse()
 
-    best_rf_acc = optimizeRFModel(
+
+    return optimizeRFModel(
         x_train, x_test, y_train, y_test)
-
 
 
 # print("Params:" + filename + ":BestAcc:" + str(best_acc))
 # job scheduler
-
+rfModelTester(ngram_min, ngram_max, min_df, max_df, featuretype)
 
 
 
