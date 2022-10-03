@@ -1,4 +1,4 @@
-from asyncio import subprocess
+import subprocess
 import os
 import numpy as np
 import time
@@ -60,21 +60,19 @@ for ngmin in np.arange(1, 5, 1):
                     fh.writelines("#!/bin/bash\n")
                     fh.writelines(
                         "#SBATCH --job-name=%s\n" % jobname)
-                    # fh.writelines(
-                        # "#SBATCH --output=../out/%s.out\n" % filename)
                     fh.writelines(
                         "#SBATCH --output=%s\n" % out_file)
                     fh.writelines(
                         "#SBATCH --error=%s\n" % err_file)
                     fh.writelines("#SBATCH --time=00:30:00\n")
-                    fh.writelines("#SBATCH --mem=250000\n")
-                    fh.writelines("#SBATCH --cores=128\n")
+                    fh.writelines("#SBATCH --mem=32000\n")
+                    fh.writelines("#SBATCH --cores=32\n")
                     fh.writelines("#SBATCH --account=cis220051\n")
                     fh.writelines("#SBATCH --partition=shared\n")
                     fh.writelines(
                         "python ./rfmodeloptimization.py %g %g %g %g %s %s" % (ngmin, ngmax, mindf, maxdf, featuretype, filename))
 
-                # subprocess.call("sbatch %s" % job_file)
+                subprocess.call(['sbatch %s' % job_file], shell=True)
                 time.sleep(0.1)
                 
                 count += 1
