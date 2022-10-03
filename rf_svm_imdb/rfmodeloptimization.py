@@ -9,11 +9,13 @@ from nltk.tokenize import word_tokenize, wordpunct_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from string import punctuation
+from prompt_toolkit import print_formatted_text
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV, train_test_split, GridSearchCV
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sympy import print_fcode
 from tqdm import tqdm
 
 '''
@@ -149,33 +151,31 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
     # min_samples_leaf = [2, 4, 8, 16]
 
     # testing cv
-    n_estimators = [100, 200, 300]
+    # Number of trees in random forest
+    n_estimators = [int(x) for x in np.linspace(start=200, stop=2000, num=10)]
     # Number of features to consider at every split
-    max_features = ['auto']
+    max_features = ['auto', 'sqrt']
     # Maximum number of levels in tree
-    max_depth = [4]
+    max_depth = [int(x) for x in np.linspace(10, 110, num=11)]
+    max_depth.append(None)
     # Minimum number of samples required to split a node
-    min_samples_split = [2]
+    min_samples_split = [2, 5, 10]
     # Minimum number of samples required at each leaf node
-    min_samples_leaf = [8]
-
-
+    min_samples_leaf = [1, 2, 4]
+    # Method of selecting samples for training each tree
+    bootstrap = [True, False]
     # Create the random grid
     random_grid = {'n_estimators': n_estimators,
-                   'max_features': max_features,
-                   'max_depth': max_depth,
-                   'min_samples_split': min_samples_split,
-                   'min_samples_leaf': min_samples_leaf}
+                'max_features': max_features,
+                'max_depth': max_depth,
+                'min_samples_split': min_samples_split,
+                'min_samples_leaf': min_samples_leaf,
+                'bootstrap': bootstrap}
 
-    # Use the random grid to search for best hyperparameters
-    # First create the base model to tune
-    # Random search of parameters, using 3 fold cross validation,
-    # search across 100 different combinations, and use all available cores
-
-    grid = GridSearchCV(RandomForestClassifier(), param_grid=random_grid, n_jobs=-1, verbose=3)
+    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=100, random_state=42, verbose=0, pre_dispatch=8)
     grid.fit(xtrain, ytrain)
 
-    print(grid.cv_results_)
+    # print(grid.cv_results_)
 
     best_model = grid.best_estimator_
     best_test_acc = best_model.score(xtest, ytest)
@@ -193,6 +193,6 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
 # job scheduler
 best_test_acc, test_prec, test_recall, test_f1 = optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
 
-print(best_test_acc, test_prec, test_recall, test_f1)
+print(f"BestTestAccuracy:{best_test_acc}:Precision:{test_prec}:Recall:{test_recall}:F1:{test_f1}")
 
 
