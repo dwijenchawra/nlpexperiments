@@ -36,10 +36,10 @@ count = 0
 maxdf = 1.0
 for ngmin in np.arange(1, 5, 1):
     for ngmax in np.arange(ngmin, 5, 1):
-        for mindf in np.arange(0.003, 0.01, 0.001):
+        for mindf in np.arange(0.003, 0.03, 0.001):
             for featuretype in ['bow', 'tfidf']:
-                if count == 1:
-                    quit()
+                # if count == 1:
+                #     quit()
 
                 jobname = "rf_testing"
                 params = [ngmin, ngmax, mindf, maxdf, featuretype]
@@ -64,7 +64,7 @@ for ngmin in np.arange(1, 5, 1):
                         "#SBATCH --output=%s\n" % out_file)
                     fh.writelines(
                         "#SBATCH --error=%s\n" % err_file)
-                    fh.writelines("#SBATCH --time=00:30:00\n")
+                    fh.writelines("#SBATCH --time=01:30:00\n")
                     fh.writelines("#SBATCH --mem=32000\n")
                     fh.writelines("#SBATCH --cores=32\n")
                     fh.writelines("#SBATCH --account=cis220051\n")
