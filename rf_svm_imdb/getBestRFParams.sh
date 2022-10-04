@@ -1,9 +1,9 @@
-for FILE in .job/out/*; do cat $FILE; done | awk -F ":" '
+for FILE in .rfjob/out/*; do cat $FILE; done | awk -F ":" '
     BEGIN{
         PROCINFO["sorted_in"] = "@val_num_desc"
     }
     {
-        acc[$2] = $4;
+        acc[sprintf("%s:%s", $2, $4)] = $10;
     }
     END{
         count = 1;
@@ -11,4 +11,4 @@ for FILE in .job/out/*; do cat $FILE; done | awk -F ":" '
             printf(i":%f\n", acc[i])
             count++;
         }
-    }' | head -n 20 | column --table --table-columns "Hyperparameters","Test Accuracy" -s ":"
+    }' | head -n 20 | column --table --table-columns "Dataset Parameters","RF Hyperparameters","F1 Score" -s ":"

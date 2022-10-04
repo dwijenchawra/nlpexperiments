@@ -1,6 +1,4 @@
-from threading import Thread
 import numpy as np
-import os
 import re
 
 import pandas as pd
@@ -10,13 +8,12 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from string import punctuation
 from prompt_toolkit import print_formatted_text
+from pytest import param
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import RandomizedSearchCV, train_test_split, GridSearchCV
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
-from sympy import print_fcode
-from tqdm import tqdm
 
 '''
 tell people about what the confusion matrix means
@@ -172,12 +169,13 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
                 'min_samples_leaf': min_samples_leaf,
                 'bootstrap': bootstrap}
 
-    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=100, random_state=42, verbose=0, pre_dispatch=8)
+    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=1, random_state=42, verbose=0, pre_dispatch=8)
     grid.fit(xtrain, ytrain)
 
     # print(grid.cv_results_)
 
     best_model = grid.best_estimator_
+    best_params = grid.best_params_
     best_test_acc = best_model.score(xtest, ytest)
 
     # Score Model and Generate confusion matrix
@@ -186,13 +184,13 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
     test_recall = recall_score(ytest, test_pred)
     test_f1 = f1_score(ytest, test_pred)
 
-    return best_test_acc, test_prec, test_recall, test_f1
+    return best_test_acc, test_prec, test_recall, test_f1, best_params
     
 
 # print("Params:" + filename + ":BestAcc:" + str(best_acc))
 # job scheduler
-best_test_acc, test_prec, test_recall, test_f1 = optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
+best_test_acc, test_prec, test_recall, test_f1, params = optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
 
-print(f"Params:{filename}:BestTestAccuracy:{best_test_acc}:Precision:{test_prec}:Recall:{test_recall}:F1:{test_f1}")
+print(f"NLPParams;{filename};RFParams;{params}:BestTestAccuracy;{best_test_acc};Precision;{test_prec};Recall;{test_recall};F1;{test_f1}")
 
 
