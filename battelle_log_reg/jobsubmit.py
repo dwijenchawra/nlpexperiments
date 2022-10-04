@@ -1,4 +1,4 @@
-from asyncio import subprocess
+import subprocess
 import os
 import numpy as np
 import time
@@ -32,9 +32,9 @@ mkdir_p(err_directory)
 # exit()
 
 count = 0
-for ngmin in np.arange(1, 5, 1):
+for ngmin in [1]:
     for ngmax in np.arange(ngmin, 5, 1):
-        for mindf in np.arange(0.006, 0.001, -0.001):
+        for mindf in np.arange(0.008, 0.001, -0.001):
             for maxdf in [1.0]:
                 for c in [0.01, 0.1, 1, 10, 100]:
                     for penalty in ['l1', 'l2']:
@@ -73,7 +73,7 @@ for ngmin in np.arange(1, 5, 1):
                             fh.writelines(
                                 "python ./modeloptimization.py %g %g %g %g %g %s %s" % (ngmin, ngmax, mindf, maxdf, c, penalty, filename))
 
-                        subprocess.call("sbatch %s" % job_file)
+                        subprocess.call(["sbatch %s" % job_file], shell=True)
                         time.sleep(0.1)
                         
                         count += 1
