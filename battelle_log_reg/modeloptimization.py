@@ -15,12 +15,7 @@ import nltk
 import sys
 
 ngram_min, ngram_max, min_df, max_df, c, penalty, filename = sys.argv[1:]
-
-
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
-data_path = "/home/x-dchawra/nlpexperiments/battelle_example/IMDB Dataset.csv.zip"
+data_path = "/home/x-dchawra/nlpexperiments/battelle_log_reg/IMDB Dataset.csv.zip"
 
 
 data = pd.read_csv(data_path)
@@ -48,8 +43,6 @@ for i in data.text:
 data['text'] = text_data
 
 import numpy as np
-from threading import Thread
-
 
 def optimizeModel(xtrain, xtest, train_labels, test_labels, c, penalty):
     log_model = LogisticRegression(max_iter=2000, solver='liblinear', C=c, penalty=penalty)
@@ -82,7 +75,7 @@ def modelTester(ngram_min, ngram_max, min_df, max_df, c, penalty):
 
 best_acc = modelTester(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), float(c), str(penalty))
 
-print("Params:" + filename + ":BestAcc:" + str(best_acc))
+print("Params;" + filename + ";BestAcc;" + str(best_acc))
 # job scheduler
 
 
