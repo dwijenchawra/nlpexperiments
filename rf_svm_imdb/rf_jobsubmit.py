@@ -34,14 +34,14 @@ mkdir_p(err_directory)
 count = 0
 
 maxdf = 1.0
-for ngmin in np.arange(1, 5, 1):
+for ngmin in [1]:
     for ngmax in np.arange(ngmin, 5, 1):
-        for mindf in np.arange(0.003, 0.03, 0.001):
+        for mindf in np.arange(0.001, 0.005, 0.0005):
             for featuretype in ['bow', 'tfidf']:
                 # if count == 1:
                 #     quit()
 
-                jobname = "rf_testing"
+                jobname = "battelle_randomforest"
                 params = [ngmin, ngmax, mindf, maxdf, featuretype]
                 stringified_params = [str(i) for i in params]
                 filename = "_".join(stringified_params)

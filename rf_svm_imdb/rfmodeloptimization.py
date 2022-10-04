@@ -169,7 +169,7 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
                 'min_samples_leaf': min_samples_leaf,
                 'bootstrap': bootstrap}
 
-    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=1, random_state=42, verbose=0, pre_dispatch=8)
+    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=100, random_state=42, verbose=0, pre_dispatch=16)
     grid.fit(xtrain, ytrain)
 
     # print(grid.cv_results_)
@@ -187,10 +187,9 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
     return best_test_acc, test_prec, test_recall, test_f1, best_params
     
 
-# print("Params:" + filename + ":BestAcc:" + str(best_acc))
 # job scheduler
 best_test_acc, test_prec, test_recall, test_f1, params = optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
 
-print(f"NLPParams;{filename};RFParams;{params}:BestTestAccuracy;{best_test_acc};Precision;{test_prec};Recall;{test_recall};F1;{test_f1}")
+print(f"NLPParams;{filename};RFParams;{params};BestTestAccuracy;{best_test_acc};Precision;{test_prec};Recall;{test_recall};F1;{test_f1}")
 
 
