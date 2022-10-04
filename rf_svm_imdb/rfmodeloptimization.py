@@ -152,11 +152,11 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
 
     # testing cv
     # Number of trees in random forest
-    n_estimators = [int(x) for x in np.linspace(start=200, stop=2000, num=10)] # 2nd run: 50-1000?
+    n_estimators = [int(x) for x in np.linspace(start=50, stop=1000, num=10)] # 2nd run: 50-1000?
     # Number of features to consider at every split
     max_features = ['auto', 'sqrt']
     # Maximum number of levels in tree
-    max_depth = [int(x) for x in np.linspace(10, 110, num=11)] # 2nd run: max < 110
+    max_depth = [int(x) for x in np.linspace(10, 50, num=5)] # 2nd run: max < 110
     max_depth.append(None)
     # Minimum number of samples required to split a node
     min_samples_split = [2, 5, 10]

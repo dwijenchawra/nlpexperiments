@@ -64,7 +64,7 @@ for ngmin in np.arange(1, 5, 1):
                         "#SBATCH --output=%s\n" % out_file)
                     fh.writelines(
                         "#SBATCH --error=%s\n" % err_file)
-                    fh.writelines("#SBATCH --time=01:30:00\n")
+                    fh.writelines("#SBATCH --time=10:00:00\n")
                     fh.writelines("#SBATCH --mem=32000\n")
                     fh.writelines("#SBATCH --cores=32\n")
                     fh.writelines("#SBATCH --account=cis220051\n")
