@@ -36,7 +36,7 @@ count = 0
 maxdf = 1.0
 for ngmin in [1]:
     for ngmax in np.arange(ngmin, 5, 1):
-        for mindf in np.arange(0.001, 0.005, 0.0005):
+        for mindf in np.arange(0.0001, 0.005, 0.0005):
             for featuretype in ['bow', 'tfidf']:
                 # if count == 1:
                 #     quit()
