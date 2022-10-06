@@ -11,4 +11,4 @@ for FILE in .rfjob/out/*; do cat $FILE; done | awk -F ";" '
             printf(i";%f\n", acc[i])
             count++;
         }
-    }' | head -n 20 | column --table --table-columns "Dataset_Parameters","RF_Hyperparameters","F1_Score" -s ";"
+    }' | head -n 50 #| column --table --table-columns "Dataset_Parameters","RF_Hyperparameters","F1_Score" -s ";"
