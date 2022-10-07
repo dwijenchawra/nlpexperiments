@@ -1,9 +1,9 @@
-for FILE in .rfjob/out/*; do cat $FILE; done | awk -F ";" '
+for FILE in .rfjob/out/*; do cat $FILE; done | awk -F "," '
     BEGIN{
         PROCINFO["sorted_in"] = "@val_num_desc"
     }
     {
-        acc[sprintf("%s;%s", $2, $4)] = $10;
+        acc[sprintf("%s;%s", $1, $2)] = $6;
     }
     END{
         count = 1;
