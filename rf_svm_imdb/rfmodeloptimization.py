@@ -149,18 +149,18 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
 
     # testing cv
     # Number of trees in random forest
-    n_estimators = [int(x) for x in np.linspace(start=50, stop=1000, num=10)] # 2nd run: 50-1000?
+    n_estimators = [int(x) for x in np.linspace(start=50, stop=2000, num=10)] # 2nd run: 50-1000?
     # Number of features to consider at every split
     max_features = ['sqrt']
     # Maximum number of levels in tree
     max_depth = [int(x) for x in np.linspace(10, 50, num=5)] # 2nd run: max < 110
     max_depth.append(None)
     # Minimum number of samples required to split a node
-    min_samples_split = [2, 5, 10]
+    min_samples_split = [1, 2, 5, 10, 20, 30]
     # Minimum number of samples required at each leaf node
-    min_samples_leaf = [1, 2, 4]
+    min_samples_leaf = [1]
     # Method of selecting samples for training each tree
-    bootstrap = [True, False]
+    bootstrap = [True]
     # Create the random grid
     random_grid = {'n_estimators': n_estimators,
                 'max_features': max_features,
@@ -169,7 +169,7 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
                 'min_samples_leaf': min_samples_leaf,
                 'bootstrap': bootstrap}
 
-    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=100, random_state=42, verbose=0, pre_dispatch=16)
+    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=1, random_state=42, verbose=0, pre_dispatch=16)
     grid.fit(xtrain, ytrain)
 
     # print(grid.cv_results_)
@@ -191,6 +191,7 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
 best_test_acc, test_prec, test_recall, test_f1, params = optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
 
 # print(f"NLPParams;{filename};RFParams;{params};BestTestAccuracy;{best_test_acc};Precision;{test_prec};Recall;{test_recall};F1;{test_f1}")
-print(f"{filename},{params},{best_test_acc},{test_prec},{test_recall},{test_f1}")
+
+print(f"{filename},{params['n_estimators']},{params['min_samples_split']},{params['min_samples_leaf']},{params['max_features']},{params['max_depth']},{params['bootstrap']},{best_test_acc},{test_prec},{test_recall},{test_f1}")
 
 
