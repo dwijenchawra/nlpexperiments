@@ -38,8 +38,8 @@ for ngmin in [1]:
     for ngmax in np.arange(ngmin, 5, 1):
         for mindf in np.arange(0.0001, 0.005, 0.0005):
             for featuretype in ['bow', 'tfidf']:
-                if count == 1:
-                    quit()
+                # if count == 1:
+                #     quit()
 
                 jobname = "rf_tdm_battelle"
                 params = [ngmin, ngmax, mindf, maxdf, featuretype]
@@ -64,8 +64,8 @@ for ngmin in [1]:
                         "#SBATCH --output=%s\n" % out_file)
                     fh.writelines(
                         "#SBATCH --error=%s\n" % err_file)
-                    fh.writelines("#SBATCH --time=10:00:00\n")
-                    fh.writelines("#SBATCH --mem=32000\n")
+                    fh.writelines("#SBATCH --time=9:00:00\n")
+                    fh.writelines("#SBATCH --mem=30000\n")
                     fh.writelines("#SBATCH --cores=32\n")
                     fh.writelines("#SBATCH --account=cis220051\n")
                     fh.writelines("#SBATCH --partition=shared\n")

@@ -156,7 +156,7 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
     max_depth = [int(x) for x in np.linspace(10, 50, num=5)] # 2nd run: max < 110
     max_depth.append(None)
     # Minimum number of samples required to split a node
-    min_samples_split = [1, 2, 5, 10, 20, 30]
+    min_samples_split = [2, 5, 10, 20, 30]
     # Minimum number of samples required at each leaf node
     min_samples_leaf = [1]
     # Method of selecting samples for training each tree
