@@ -190,6 +190,7 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
 # job scheduler
 best_test_acc, test_prec, test_recall, test_f1, params = optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
 
-print(f"NLPParams;{filename};RFParams;{params};BestTestAccuracy;{best_test_acc};Precision;{test_prec};Recall;{test_recall};F1;{test_f1}")
+# print(f"NLPParams;{filename};RFParams;{params};BestTestAccuracy;{best_test_acc};Precision;{test_prec};Recall;{test_recall};F1;{test_f1}")
+print(f"{filename},{params},{best_test_acc},{test_prec},{test_recall},{test_f1}")
 
 
