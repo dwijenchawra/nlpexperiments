@@ -169,7 +169,7 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
                 'min_samples_leaf': min_samples_leaf,
                 'bootstrap': bootstrap}
 
-    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=1, random_state=42, verbose=0, pre_dispatch=16)
+    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=200, random_state=42, verbose=0, pre_dispatch=16)
     grid.fit(xtrain, ytrain)
 
     # print(grid.cv_results_)
