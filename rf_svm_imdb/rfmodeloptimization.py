@@ -136,62 +136,61 @@ def optimizeRFModel(ngram_min, ngram_max, min_df, max_df, feature_type='bow'):
     xtrain, ytrain, xtest, ytest = generate_features(
         data, feature_type=feature_type, ngram_min=ngram_min, ngram_max=ngram_max, min_df=min_df, max_df=max_df
     )
-    # n_estimators = [int(x) for x in np.arange(start=50, stop=3000, step=100)]
+    # n_estimators = [10]
     # # Number of features to consider at every split
-    # max_features = ['auto', 'sqrt']
+    # max_features = ['sqrt']
     # # Maximum number of levels in tree
     # max_depth = [int(x) for x in np.arange(1, 20, step=5)]
-    # max_depth.append(None)
     # # Minimum number of samples required to split a node
-    # min_samples_split = [2, 4, 8, 10]
+    # min_samples_split = [2]
     # # Minimum number of samples required at each leaf node
-    # min_samples_leaf = [2, 4, 8, 16]
+    # min_samples_leaf = [2]
 
     # testing cv
     # Number of trees in random forest
-    n_estimators = [int(x) for x in np.linspace(start=50, stop=2000, num=10)] # 2nd run: 50-1000?
-    # Number of features to consider at every split
-    max_features = ['sqrt']
+    n_estimators = [int(x) for x in np.linspace(start=50, stop=2000, num=50)] # 2nd run: 50-1000?
     # Maximum number of levels in tree
-    max_depth = [int(x) for x in np.linspace(10, 50, num=5)] # 2nd run: max < 110
+    max_depth = [int(x) for x in np.linspace(1, 50, num=5)] # 2nd run: max < 110
     max_depth.append(None)
     # Minimum number of samples required to split a node
-    min_samples_split = [2, 5, 10, 20, 30]
+    min_samples_split = [2, 5, 10]
     # Minimum number of samples required at each leaf node
-    min_samples_leaf = [1]
-    # Method of selecting samples for training each tree
-    bootstrap = [True]
+    min_samples_leaf = [1, 2]
     # Create the random grid
     random_grid = {'n_estimators': n_estimators,
-                'max_features': max_features,
                 'max_depth': max_depth,
                 'min_samples_split': min_samples_split,
-                'min_samples_leaf': min_samples_leaf,
-                'bootstrap': bootstrap}
+                'min_samples_leaf': min_samples_leaf
+                }
 
-    grid = RandomizedSearchCV(RandomForestClassifier(), param_distributions=random_grid, n_jobs=-1, n_iter=200, random_state=42, verbose=0, pre_dispatch=16)
+    grid = GridSearchCV(RandomForestClassifier(), param_grid=random_grid,
+        scoring=["accuracy", "f1", "precision", "recall", "roc_auc"], n_jobs=64, verbose=1, refit=False, return_train_score=True)
     grid.fit(xtrain, ytrain)
 
-    # print(grid.cv_results_)
+    results = pd.DataFrame(grid.cv_results_)
+    results.to_csv("/home/x-dchawra/nlpexperiments/rf_svm_imdb/.rfjob/out/" + filename + ".csv")
+    
 
-    best_model = grid.best_estimator_
-    best_params = grid.best_params_
-    best_test_acc = best_model.score(xtest, ytest)
+    # best_model = grid.best_estimator_
+    # best_params = grid.best_params_
+    # best_test_acc = best_model.score(xtest, ytest)
 
-    # Score Model and Generate confusion matrix
-    test_pred = best_model.predict(xtest)
-    test_prec = precision_score(ytest, test_pred)
-    test_recall = recall_score(ytest, test_pred)
-    test_f1 = f1_score(ytest, test_pred)
+    # # Score Model and Generate confusion matrix
+    # test_pred = best_model.predict(xtest)
+    # test_prec = precision_score(ytest, test_pred)
+    # test_recall = recall_score(ytest, test_pred)
+    # test_f1 = f1_score(ytest, test_pred)
 
-    return best_test_acc, test_prec, test_recall, test_f1, best_params
+    # return best_test_acc, test_prec, test_recall, test_f1, best_params
     
 
 # job scheduler
-best_test_acc, test_prec, test_recall, test_f1, params = optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
+# best_test_acc, test_prec, test_recall, test_f1, params = optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
+
+optimizeRFModel(int(ngram_min), int(ngram_max), np.double(min_df), np.double(max_df), str(featuretype))
 
 # print(f"NLPParams;{filename};RFParams;{params};BestTestAccuracy;{best_test_acc};Precision;{test_prec};Recall;{test_recall};F1;{test_f1}")
 
-print(f"{filename},{params['n_estimators']},{params['min_samples_split']},{params['min_samples_leaf']},{params['max_features']},{params['max_depth']},{params['bootstrap']},{best_test_acc},{test_prec},{test_recall},{test_f1}")
+# print(f"{filename},{params['n_estimators']},{params['min_samples_split']},{params['min_samples_leaf']},{params['max_features']},{params['max_depth']},{params['bootstrap']},{best_test_acc},{test_prec},{test_recall},{test_f1}")
 
 

@@ -34,45 +34,45 @@ mkdir_p(err_directory)
 count = 0
 
 maxdf = 1.0
-for ngmin in [1]:
-    for ngmax in np.arange(ngmin, 5, 1):
-        for mindf in np.arange(0.0001, 0.005, 0.0005):
-            for featuretype in ['bow', 'tfidf']:
-                # if count == 1:
-                #     quit()
+ngmin = 1
+ngmax = 4
+mindf = 0.001
+for featuretype in ['bow', 'tfidf']:
+    # if count == 1:
+    #     quit()
 
-                jobname = "rf_tdm_battelle"
-                params = [ngmin, ngmax, mindf, maxdf, featuretype]
-                stringified_params = [str(i) for i in params]
-                filename = "_".join(stringified_params)
+    jobname = "rf_tdm_battelle"
+    params = [ngmin, ngmax, mindf, maxdf, featuretype]
+    stringified_params = [str(i) for i in params]
+    filename = "_".join(stringified_params)
 
-                job_file = os.path.join(
-                    script_directory, "%s.sh" % filename)
-                
-                out_file = os.path.join(
-                    out_directory, "%s.out" % filename)
-                err_file = os.path.join(
-                    err_directory, "%s.err" % filename)
+    job_file = os.path.join(
+        script_directory, "%s.sh" % filename)
+    
+    out_file = os.path.join(
+        out_directory, "%s.out" % filename)
+    err_file = os.path.join(
+        err_directory, "%s.err" % filename)
 
-                # Create lizard directories
+    # Create lizard directories
 
-                with open(job_file, "w") as fh:
-                    fh.writelines("#!/bin/bash\n")
-                    fh.writelines(
-                        "#SBATCH --job-name=%s\n" % jobname)
-                    fh.writelines(
-                        "#SBATCH --output=%s\n" % out_file)
-                    fh.writelines(
-                        "#SBATCH --error=%s\n" % err_file)
-                    fh.writelines("#SBATCH --time=9:00:00\n")
-                    fh.writelines("#SBATCH --mem=30000\n")
-                    fh.writelines("#SBATCH --cores=32\n")
-                    fh.writelines("#SBATCH --account=cis220051\n")
-                    fh.writelines("#SBATCH --partition=shared\n")
-                    fh.writelines(
-                        "python ./rfmodeloptimization.py %g %g %g %g %s %s" % (ngmin, ngmax, mindf, maxdf, featuretype, filename))
+    with open(job_file, "w") as fh:
+        fh.writelines("#!/bin/bash\n")
+        fh.writelines(
+            "#SBATCH --job-name=%s\n" % jobname)
+        fh.writelines(
+            "#SBATCH --output=%s\n" % out_file)
+        fh.writelines(
+            "#SBATCH --error=%s\n" % err_file)
+        fh.writelines("#SBATCH --time=1-00:00:00\n")
+        fh.writelines("#SBATCH --mem=128000\n")
+        fh.writelines("#SBATCH --cores=64\n")
+        fh.writelines("#SBATCH --account=cis220051\n")
+        fh.writelines("#SBATCH --partition=shared\n")
+        fh.writelines(
+            "python ./rfmodeloptimization.py %g %g %g %g %s %s" % (ngmin, ngmax, mindf, maxdf, featuretype, filename))
 
-                subprocess.call(['sbatch %s' % job_file], shell=True)
-                time.sleep(0.1)
-                
-                count += 1
+    subprocess.call(['sbatch %s' % job_file], shell=True)
+    time.sleep(0.1)
+    
+    count += 1
