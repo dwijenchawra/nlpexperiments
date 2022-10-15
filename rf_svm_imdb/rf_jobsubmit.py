@@ -64,7 +64,7 @@ for featuretype in ['bow', 'tfidf']:
             "#SBATCH --output=%s\n" % out_file)
         fh.writelines(
             "#SBATCH --error=%s\n" % err_file)
-        fh.writelines("#SBATCH --time=1-00:00:00\n")
+        fh.writelines("#SBATCH --time=2-00:00:00\n")
         fh.writelines("#SBATCH --mem=128000\n")
         fh.writelines("#SBATCH --cores=64\n")
         fh.writelines("#SBATCH --account=cis220051\n")
